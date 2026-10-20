@@ -1,0 +1,66 @@
+{
+  "name": "iebox",
+  "version": "0.1.0",
+  "description": "A free, open-source IE Tab alternative for Windows: open legacy IE-only sites in the real Trident engine.",
+  "type": "module",
+  "bin": {
+    "iebox": "bin/iebox.js"
+  },
+  "main": "src/cli.js",
+  "exports": {
+    ".": "./src/cli.js",
+    "./build": "./src/build.js",
+    "./config": "./src/config.js",
+    "./doctor": "./src/doctor.js",
+    "./emulation": "./src/emulation.js",
+    "./launch": "./src/launch.js",
+    "./registry": "./src/registry.js",
+    "./url": "./src/url.js",
+    "./util": "./src/util.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "host",
+    "docs",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "CODE_OF_CONDUCT.md",
+    "SECURITY.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "os": [
+    "win32"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "doctor": "node bin/iebox.js doctor",
+    "build": "node bin/iebox.js build"
+  },
+  "keywords": [
+    "ie",
+    "internet-explorer",
+    "trident",
+    "mshtml",
+    "ie-tab",
+    "legacy",
+    "windows",
+    "webbrowser",
+    "activex",
+    "intranet"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arifs122/iebox"
+  },
+  "bugs": {
+    "url": "https://github.com/arifs122/iebox/issues"
+  },
+  "homepage": "https://github.com/arifs122/iebox#readme",
+  "author": "arifs122"
+}

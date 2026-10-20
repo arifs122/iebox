@@ -1,0 +1,24 @@
+# Runtime data is written to %LOCALAPPDATA%\iebox, outside this repository.
+# The entries below only guard against local build/test litter.
+
+node_modules/
+*.exe
+host/bin/
+bin/Debug/
+bin/Release/
+obj/
+.vs/
+*.user
+*.suo
+*.cache
+coverage/
+.nyc_output/
+*.log
+npm-debug.log*
+yarn-error.log*
+*.tmp
+*.tmp.exe
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
