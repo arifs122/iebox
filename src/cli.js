@@ -9,7 +9,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { buildHost } from './build.js';
+import { buildHost, normalizeArch } from './build.js';
 import {
   configPaths,
   ensureConfig,
@@ -62,6 +62,7 @@ export function parseArgs(argv = []) {
     url: null,
     emulation: null,
     emulationArg: null,
+    arch: null,
     home: false,
     force: false,
     json: false,
@@ -111,6 +112,15 @@ export function parseArgs(argv = []) {
             throw new UserError(`--emulation needs a mode (${EMULATION_ORDER.join(', ')}).`);
           }
           parsed.emulationArg = String(value);
+          break;
+        }
+        case '--arch': {
+          const value = inline !== null ? inline : argv[i + 1];
+          if (inline === null) i += 1;
+          if (!value || String(value).startsWith('-')) {
+            throw new UserError('--arch needs a value: x86, x64 or anycpu.');
+          }
+          parsed.arch = String(value);
           break;
         }
         case '--help':
@@ -175,6 +185,14 @@ export function parseArgs(argv = []) {
     parsed.emulation = mode;
   }
 
+  if (parsed.arch) {
+    try {
+      parsed.arch = normalizeArch(parsed.arch);
+    } catch (error) {
+      throw new UserError(error.message);
+    }
+  }
+
   if (parsed.home && parsed.url) {
     throw new UserError('--home cannot be combined with a URL.');
   }
@@ -207,6 +225,8 @@ export function helpText(colors = makeColors(false)) {
     b('Options'),
     '  --home                       Open the saved home page',
     '  --emulation <mode>           Override the mode for this run only',
+    '  --arch <x86|x64|anycpu>      Host architecture; x86 is the default because',
+    '                               32-bit ActiveX (camera/NVR plugins) needs it',
     '  --json                       Machine-readable output (doctor, config)',
     '  --no-color, -q               Plain output; -q also hides progress lines',
     '  -h, --help                   Show this help',
@@ -263,13 +283,14 @@ function commandBuild(parsed, context) {
 
   if (!parsed.quiet) io.out(colors.dim('Checking the Trident host ...'));
 
-  const result = build({ env, platform, force: parsed.force });
+  const result = build({ env, platform, force: parsed.force, arch: parsed.arch || undefined });
   if (result.reused) {
     io.out(`${colors.green('Host is up to date.')} ${colors.dim(result.exe)}`);
   } else {
     io.out(`${colors.green('Compiled the Trident host.')} ${colors.dim(`${result.durationMs} ms`)}`);
   }
   io.out(`  executable  ${result.exe} (${formatBytes(result.size)})`);
+  io.out(`  architecture ${result.arch === 'x86' ? '32-bit (x86) — required by most legacy ActiveX' : (result.arch || 'x86')}`);
   io.out(`  compiler    ${result.csc}`);
   io.out(`  source hash ${result.hash.slice(0, 16)}...`);
   return EXIT.OK;
@@ -293,7 +314,7 @@ async function commandOpen(parsed, context) {
     printWarning(io, colors, `could not save the last URL to ${saved.path}: ${saved.error}`);
   }
 
-  const build = (deps.buildHost || buildHost)({ env, platform, force: false });
+  const build = (deps.buildHost || buildHost)({ env, platform, force: false, arch: parsed.arch || undefined });
   if (!parsed.quiet) {
     if (build.reused) io.out(`${colors.green('Host ready.')} ${colors.dim(build.exe)}`);
     else io.out(`${colors.green('Host compiled.')} ${colors.dim(`${build.durationMs} ms`)}`);

@@ -19,6 +19,25 @@ import { VERSION, isWindows, OperationalError } from './util.js';
 export const BUILD_CACHE_VERSION = 2;
 export const HOST_SOURCE_RELATIVE = path.join('host', 'IeBoxHost.cs');
 
+/** 32-bit by default: almost every legacy ActiveX control (camera and NVR
+ *  web plugins in particular) ships as x86 only, and a 64-bit process cannot
+ *  load it. `--arch x64` is there for the rare 64-bit control. */
+export const DEFAULT_ARCH = 'x86';
+const ARCHES = new Set(['x86', 'x64', 'anycpu']);
+
+/**
+ * @param {string | null | undefined} value raw `--arch` value
+ * @returns {'x86' | 'x64' | 'anycpu'}
+ */
+export function normalizeArch(value) {
+  if (value === undefined || value === null || value === '') return DEFAULT_ARCH;
+  const text = String(value).trim().toLowerCase();
+  if (text === 'x86' || text === '32' || text === 'ia32') return 'x86';
+  if (text === 'x64' || text === '64' || text === 'amd64') return 'x64';
+  if (text === 'any' || text === 'anycpu') return 'anycpu';
+  throw new OperationalError(`Unknown architecture "${value}". Use x86, x64 or anycpu.`);
+}
+
 export function hostSourcePath(root = ROOT) {
   return path.join(root, HOST_SOURCE_RELATIVE);
 }
@@ -71,7 +90,7 @@ export function buildArgs(options = {}) {
   return [
     '/nologo',
     '/target:winexe',
-    '/platform:anycpu',
+    `/platform:${normalizeArch(options.arch)}`,
     '/optimize+',
     '/codepage:65001',
     '/warn:4',
@@ -111,6 +130,7 @@ export function isCacheValid(meta, expected) {
   if (!meta || typeof meta !== 'object') return false;
   if (meta.cacheVersion !== BUILD_CACHE_VERSION) return false;
   if (meta.hash !== expected.hash) return false;
+  if (expected.arch && meta.arch !== expected.arch) return false;
   if (!expected.exeExists) return false;
   if (!Number.isFinite(expected.exeSize) || expected.exeSize <= 0) return false;
   if (Number(meta.size) !== Number(expected.exeSize)) return false;
@@ -138,6 +158,37 @@ function looksLikeExe(file) {
     }
   } catch {
     return false;
+  }
+}
+
+/**
+ * Read the machine type out of a PE executable's COFF header.
+ * Used by `doctor` to tell you whether the compiled host is 32-bit — which is
+ * what decides whether a 32-bit ActiveX control can load in it.
+ *
+ * @param {string} file
+ * @returns {'x86' | 'x64' | null}
+ */
+export function readPeMachine(file) {
+  try {
+    const fd = fs.openSync(file, 'r');
+    try {
+      const dos = Buffer.alloc(64);
+      if (fs.readSync(fd, dos, 0, 64, 0) < 64) return null;
+      if (dos[0] !== 0x4d || dos[1] !== 0x5a) return null;
+      const peOffset = dos.readUInt32LE(0x3c);
+      const head = Buffer.alloc(6);
+      if (fs.readSync(fd, head, 0, 6, peOffset) < 6) return null;
+      if (head[0] !== 0x50 || head[1] !== 0x45 || head[2] !== 0 || head[3] !== 0) return null;
+      const machine = head.readUInt16LE(4);
+      if (machine === 0x014c) return 'x86'; // IMAGE_FILE_MACHINE_I386
+      if (machine === 0x8664) return 'x64'; // IMAGE_FILE_MACHINE_AMD64
+      return null;
+    } finally {
+      fs.closeSync(fd);
+    }
+  } catch {
+    return null;
   }
 }
 
@@ -207,6 +258,7 @@ export function buildHost(options = {}) {
   const sourcePath = options.sourcePath || hostSourcePath(options.root || ROOT);
   const source = readHostSource(sourcePath);
   const hash = sourceHash(source);
+  const arch = normalizeArch(options.arch ?? (options.env || process.env).IEBOX_ARCH);
 
   const csc = options.cscPath || findCsc(options);
   if (!csc) {
@@ -227,13 +279,14 @@ export function buildHost(options = {}) {
   const exeSize = statSize(exe);
   const meta = readBuildMeta(metaPath);
 
-  if (!options.force && isCacheValid(meta, { hash, exeExists: exeSize > 0, exeSize })) {
+  if (!options.force && isCacheValid(meta, { hash, arch, exeExists: exeSize > 0, exeSize })) {
     return {
       ok: true,
       reused: true,
       exe,
       csc,
       hash,
+      arch,
       size: exeSize,
       metaPath,
       warnings: [],
@@ -242,7 +295,7 @@ export function buildHost(options = {}) {
   }
 
   const tempExe = path.join(path.dirname(exe), `.iebox-host-${process.pid}-${Date.now()}.tmp.exe`);
-  const args = buildArgs({ source: sourcePath, out: tempExe, csc });
+  const args = buildArgs({ source: sourcePath, out: tempExe, csc, arch });
   const started = Date.now();
 
   try {
@@ -284,6 +337,7 @@ export function buildHost(options = {}) {
       name: 'iebox-host',
       version: VERSION,
       hash,
+      arch,
       csc,
       source: path.relative(options.root || ROOT, sourcePath) || sourcePath,
       builtAt: new Date().toISOString(),
@@ -302,6 +356,7 @@ export function buildHost(options = {}) {
       exe,
       csc,
       hash,
+      arch,
       size: metaOut.size,
       metaPath,
       warnings: [],
@@ -339,6 +394,7 @@ export function inspectHost(options = {}) {
     exists: size > 0,
     size: size > 0 ? size : 0,
     meta,
+    arch: (meta && meta.arch) || readPeMachine(paths.hostExe),
     sourceHash: hash,
     fresh: isCacheValid(meta, { hash, exeExists: size > 0, exeSize: size }),
     valid: size > 0 && looksLikeExe(paths.hostExe),

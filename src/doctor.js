@@ -254,13 +254,21 @@ export function runDoctor(options = {}) {
     fresh: false,
     valid: false,
     meta: null,
+    arch: null,
     path: '',
   });
   let hostStatus = 'warn';
   let hostDetail;
+  const archLabel = host && host.arch === 'x86'
+    ? '32-bit (x86)'
+    : host && host.arch === 'x64'
+      ? '64-bit (x64)'
+      : host && host.arch
+        ? String(host.arch)
+        : 'unknown architecture';
   if (host && host.exists && host.valid) {
     hostStatus = host.fresh ? 'ok' : 'warn';
-    hostDetail = `${host.path} (${formatBytes(host.size)})${host.fresh ? ', cache matches the source' : ', stale or built without cache metadata; the next launch recompiles'}`;
+    hostDetail = `${host.path} (${formatBytes(host.size)}, ${archLabel})${host.fresh ? ', cache matches the source' : ', stale or built without cache metadata; the next launch recompiles'}`;
   } else if (host && host.exists) {
     hostStatus = 'warn';
     hostDetail = `${host.path} exists but is not a valid executable; run iebox build --force.`;

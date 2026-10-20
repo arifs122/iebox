@@ -4,6 +4,18 @@ All notable changes to iebox are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `--arch <x86|x64|anycpu>` and the `IEBOX_ARCH` environment variable.
+- The host is now **32-bit by default**. Nearly every legacy ActiveX control —
+  including the camera and NVR web plugins this tool is usually reached for —
+  is x86 only, and a 64-bit process cannot load it.
+- `doctor` reports the compiled host's architecture (read from the PE header).
+- A "Camera systems, NVRs and ActiveX" section in the README covering zone
+  settings, emulation modes and the NPAPI dead end.
+
 ## [0.1.0] - 2026-10-20
 
 The first working release.

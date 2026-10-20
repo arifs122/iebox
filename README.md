@@ -108,6 +108,41 @@ iebox https://intranet.example.local/
 
 There is **no `npm install` step**, because there are no dependencies. `npm test` runs the suite with `node --test`.
 
+## Camera systems, NVRs and ActiveX
+
+This is what many people actually need iebox for: an NVR or IP camera whose web
+UI only works in Internet Explorer, usually because the live view is an ActiveX
+control.
+
+1. **The host is 32-bit by default**, because nearly every vendor ActiveX control
+   (Hikvision, Dahua, Uniview, …) ships as x86 only and a 64-bit process cannot
+   load it. `iebox doctor` shows which architecture you have. If your control is
+   64-bit, rebuild with `iebox build --force --arch x64`.
+2. Open the panel: `iebox http://192.168.1.64/`
+3. If the page says the plugin is missing, try the emulation mode the vendor
+   documents. Most are IE11; older firmware wants IE8/IE9:
+
+   ```powershell
+   iebox --emulation ie8 http://192.168.1.64/
+   ```
+
+4. **Allow the control.** Windows blocks unsigned ActiveX by default:
+   - Internet Options → Security → **Trusted sites** → add the camera's IP
+     (`http://192.168.1.64`), untick "Require server verification".
+   - For that zone: Custom level → **Initialize and script ActiveX controls not
+     marked as safe** → *Prompt* (or *Enable* on a machine that only ever touches
+     the camera LAN).
+5. If the firmware is old enough to speak only TLS 1.0/1.1, enable those in
+   Internet Options → Advanced — or better, put the camera on an isolated VLAN.
+
+**What will not work:** plugins that were **NPAPI** (the old Firefox/Chrome
+kind) instead of ActiveX. Those cannot load in Trident either; use the vendor's
+native client for that model.
+
+The ActiveX control runs native code with your Windows user's privileges. That
+is the whole point of using this engine, and it is the risk. Keep the camera UI
+on a trusted network.
+
 ## Features
 
 | Feature | Behaviour |

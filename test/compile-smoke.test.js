@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { buildArgs, findCsc, hostSourcePath } from '../src/build.js';
+import { buildArgs, findCsc, hostSourcePath, readPeMachine } from '../src/build.js';
 
 const csc = findCsc();
 const skip =
@@ -33,6 +33,7 @@ test('the C# host compiles with the built-in .NET Framework compiler', { skip, t
     fs.readSync(fd, header, 0, 2, 0);
     fs.closeSync(fd);
     assert.equal(header.toString('ascii'), 'MZ');
+    assert.equal(readPeMachine(exe), 'x86', 'the default build must be 32-bit for legacy ActiveX');
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });
   }

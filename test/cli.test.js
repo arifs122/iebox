@@ -6,6 +6,15 @@ import { parseArgs, main, helpText } from '../src/cli.js';
 import { configPaths, ensureConfig, loadConfig } from '../src/config.js';
 import { makeTempEnv, captureIo, fakeBuild, fakeLaunch } from './helpers.js';
 
+test('parseArgs handles --arch and rejects unknown architectures', () => {
+  assert.equal(parseArgs([]).arch, null);
+  assert.equal(parseArgs(['--arch', 'x64']).arch, 'x64');
+  assert.equal(parseArgs(['--arch=32']).arch, 'x86');
+  assert.equal(parseArgs(['--arch', 'anycpu']).arch, 'anycpu');
+  assert.throws(() => parseArgs(['--arch', 'arm']), /Unknown architecture/);
+  assert.throws(() => parseArgs(['--arch']), /needs a value/);
+});
+
 test('parseArgs handles the documented commands and defaults', () => {
   assert.equal(parseArgs([]).command, 'open');
   assert.equal(parseArgs([]).url, null);

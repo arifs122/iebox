@@ -9,6 +9,8 @@ import {
   findCsc,
   sourceHash,
   buildArgs,
+  normalizeArch,
+  readPeMachine,
   readBuildMeta,
   isCacheValid,
   extractCompilerErrors,
@@ -68,12 +70,12 @@ test('csc discovery supports IEBOX_CSC and returns null off Windows', () => {
   assert.equal(findCsc({ platform: 'win32', env: { WINDIR: 'C:\\Windows' }, exists: () => false }), null);
 });
 
-test('buildArgs lists the exact csc command line', () => {
+test('buildArgs lists the exact csc command line and defaults to x86', () => {
   const args = buildArgs({ source: 'host\\IeBoxHost.cs', out: 'C:\\out\\iebox-host.exe' });
   assert.deepEqual(args, [
     '/nologo',
     '/target:winexe',
-    '/platform:anycpu',
+    '/platform:x86',
     '/optimize+',
     '/codepage:65001',
     '/warn:4',
@@ -83,8 +85,22 @@ test('buildArgs lists the exact csc command line', () => {
     '/r:System.Windows.Forms.dll',
     'host\\IeBoxHost.cs',
   ]);
+  assert.ok(buildArgs({ source: 'a.cs', out: 'b.exe', arch: 'x64' }).includes('/platform:x64'));
+  assert.ok(buildArgs({ source: 'a.cs', out: 'b.exe', arch: 'anycpu' }).includes('/platform:anycpu'));
   assert.throws(() => buildArgs({}), /source and out/);
   assert.ok(hostSourcePath().endsWith(path.join('host', 'IeBoxHost.cs')));
+});
+
+test('normalizeArch accepts the documented aliases and rejects nonsense', () => {
+  assert.equal(normalizeArch(), 'x86');
+  assert.equal(normalizeArch(''), 'x86');
+  assert.equal(normalizeArch('X86'), 'x86');
+  assert.equal(normalizeArch('32'), 'x86');
+  assert.equal(normalizeArch('ia32'), 'x86');
+  assert.equal(normalizeArch('64'), 'x64');
+  assert.equal(normalizeArch('amd64'), 'x64');
+  assert.equal(normalizeArch('any'), 'anycpu');
+  assert.throws(() => normalizeArch('arm'), /Unknown architecture/);
 });
 
 test('sourceHash is stable, versioned and sensitive to content', () => {
@@ -98,8 +114,10 @@ test('sourceHash is stable, versioned and sensitive to content', () => {
 });
 
 test('isCacheValid requires hash, size, version and a real exe', () => {
-  const meta = { cacheVersion: BUILD_CACHE_VERSION, hash: 'abc', size: 100 };
+  const meta = { cacheVersion: BUILD_CACHE_VERSION, hash: 'abc', size: 100, arch: 'x86' };
   assert.equal(isCacheValid(meta, { hash: 'abc', exeExists: true, exeSize: 100 }), true);
+  assert.equal(isCacheValid(meta, { hash: 'abc', arch: 'x86', exeExists: true, exeSize: 100 }), true);
+  assert.equal(isCacheValid(meta, { hash: 'abc', arch: 'x64', exeExists: true, exeSize: 100 }), false);
   assert.equal(isCacheValid(meta, { hash: 'abc', exeExists: false, exeSize: 100 }), false);
   assert.equal(isCacheValid(meta, { hash: 'other', exeExists: true, exeSize: 100 }), false);
   assert.equal(isCacheValid(meta, { hash: 'abc', exeExists: true, exeSize: 99 }), false);
