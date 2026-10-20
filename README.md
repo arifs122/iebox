@@ -8,6 +8,8 @@
 > longer allow the extension approach). "Internet Explorer", "Windows" and
 > "Microsoft" are trademarks of Microsoft Corporation.
 
+**Project page:** [arifs122.github.io/iebox](https://arifs122.github.io/iebox/) · **Camera/NVR guide:** [ActiveX setup, 32-bit plugins, portable export](https://github.com/arifs122/iebox#camera-systems-nvrs-and-activex)
+
 [![CI](https://github.com/arifs122/iebox/actions/workflows/ci.yml/badge.svg)](https://github.com/arifs122/iebox/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Platform: Windows 10 and 11](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4.svg)](#requirements)

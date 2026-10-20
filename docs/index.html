@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iebox — a free IE Tab alternative for Windows</title>
+<meta name="description" content="Open legacy IE-only sites — camera panels, intranets, ActiveX tools — in a free, open-source window that hosts the real Trident engine.">
+<meta property="og:title" content="iebox">
+<meta property="og:description" content="A free, open-source IE Tab alternative for Windows. The real Trident engine in a standalone window.">
+<meta property="og:image" content="screenshot-mock.svg">
+<style>
+  :root{--bg:#07070e;--panel:rgba(255,255,255,.04);--border:rgba(255,255,255,.1);--text:#eceef7;--muted:#9ba1b8;--faint:#6d7391;--amber:#fbbf24}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,Inter,Arial,sans-serif;line-height:1.55}
+  .glow{position:fixed;border-radius:50%;filter:blur(100px);opacity:.22;pointer-events:none}
+  .a{width:560px;height:560px;top:-240px;left:-140px;background:#7c5cff}
+  .b{width:520px;height:520px;top:100px;right:-200px;background:#0ea5e9;opacity:.18}
+  main{position:relative;max-width:980px;margin:0 auto;padding:72px 24px 80px}
+  .eyebrow{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);font-weight:600;margin:0 0 16px}
+  h1{margin:0;font-size:clamp(38px,7vw,64px);line-height:1.03;letter-spacing:-.035em;font-weight:800;
+     background:linear-gradient(96deg,#7c5cff 0%,#0ea5e9 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{color:var(--muted);font-size:18px;max-width:64ch;margin:18px 0 0}
+  .cta{display:flex;flex-wrap:wrap;gap:12px;margin:30px 0 0}
+  .btn{display:inline-block;padding:13px 22px;border-radius:12px;font-weight:700;text-decoration:none;font-size:15px}
+  .primary{background:linear-gradient(96deg,#7c5cff,#0ea5e9);color:#06060c}
+  .ghost{border:1px solid var(--border);background:var(--panel);color:var(--text)}
+  .shot{margin:46px 0 0;border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 30px 80px -40px #000;background:#0b0b14}
+  .shot img{display:block;width:100%}
+  .cap{color:var(--faint);font-size:12.5px;margin:10px 0 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:44px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px}
+  .card h3{margin:0 0 8px;font-size:15px}
+  .card p{margin:0;color:var(--muted);font-size:14px}
+  pre{background:#0c0c18;border:1px solid var(--border);border-radius:12px;padding:16px 18px;overflow-x:auto;margin:14px 0 0}
+  code{font-family:ui-monospace,Consolas,monospace;font-size:13.5px;color:#d7dbe8}
+  .warn{margin-top:26px;border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.07);border-radius:14px;padding:16px 18px;color:#fde68a;font-size:14px}
+  .foot{margin-top:56px;padding-top:24px;border-top:1px solid var(--border);color:var(--faint);font-size:13px;display:flex;gap:18px;flex-wrap:wrap}
+  .foot a{color:var(--muted)}
+  @media (prefers-reduced-motion:no-preference){.shot{animation:rise .7s cubic-bezier(.22,1,.36,1) both}@keyframes rise{from{opacity:0;transform:translateY(16px)}}}
+</style>
+</head>
+<body>
+<div class="glow a"></div><div class="glow b"></div>
+<main>
+  <p class="eyebrow">Windows 10/11 · free and open source</p>
+  <h1>The old web,<br>in a window.</h1>
+  <p class="lede"><strong>iebox</strong> hosts the real Microsoft Trident engine — the one inside Internet Explorer 11 —
+    in a small standalone window with a modern toolbar. For the intranet portal, the vendor admin panel and the camera
+    NVR whose live view only works in IE.</p>
+
+  <div class="cta">
+    <a class="btn primary" href="https://github.com/arifs122/iebox">Get it on GitHub</a>
+    <a class="btn ghost" href="https://www.npmjs.com/package/iebox">npm</a>
+    <a class="btn ghost" href="https://github.com/arifs122/iebox#camera-systems-nvrs-and-activex">Camera / NVR guide</a>
+  </div>
+
+  <pre><code>npx iebox http://192.168.1.64/          # or: iebox build &amp;&amp; iebox export C:\iebox-camera --url ...</code></pre>
+
+  <figure class="shot"><img src="screenshot-mock.svg" alt="Illustration of the iebox window: dark toolbar, address bar, legacy intranet page and a Trident badge"></figure>
+  <p class="cap">Illustration of the real layout — this project is a native Windows app, so there is no browser demo.</p>
+
+  <section class="grid">
+    <div class="card"><h3>Real engine, not a mock</h3><p>MSHTML/Trident through the WinForms WebBrowser control, with an IE11/IE10/IE9/IE8/IE7 emulation switch.</p></div>
+    <div class="card"><h3>32-bit by default</h3><p>Most camera and NVR ActiveX controls are x86 only. The host is compiled for x86 unless you ask otherwise.</p></div>
+    <div class="card"><h3>No Node on the target PC</h3><p><code>iebox export</code> writes a folder with the compiled exe, a double-click launcher and the ActiveX steps.</p></div>
+  </section>
+
+  <div class="warn"><strong>Security:</strong> the Trident engine is unsandboxed and receives no security updates.
+    An ActiveX control runs native code with your user's privileges. Use iebox only for trusted legacy devices, and keep
+    those devices on a network you control. It is not a browser replacement.</div>
+
+  <p class="foot">
+    <span>Not affiliated with IE Tab / Blackfish Software or Microsoft.</span>
+    <a href="https://github.com/arifs122/iebox/blob/main/README.md">README</a>
+    <a href="https://github.com/arifs122/iebox/blob/main/SECURITY.md">Security</a>
+    <a href="https://github.com/arifs122/iebox/blob/main/LICENSE">MIT</a>
+  </p>
+</main>
+</body>
+</html>
