@@ -92,3 +92,9 @@ Community Impact Guidelines were inspired by
 
 For answers to common questions about this code of conduct, see the FAQ at
 [https://www.contributor-covenant.org/faq](https://www.contributor-covenant.org/faq).
+
+## License of this document
+
+The Contributor Covenant is licensed under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). This adaptation is
+shared under the same license, with attribution to the original authors.
