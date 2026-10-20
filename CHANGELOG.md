@@ -13,6 +13,9 @@ All notable changes to iebox are documented here. The format follows
   including the camera and NVR web plugins this tool is usually reached for —
   is x86 only, and a 64-bit process cannot load it.
 - `doctor` reports the compiled host's architecture (read from the PE header).
+- `iebox export <dir> [--url <url>]` writes a portable folder (host exe,
+  double-clickable launcher, operator note) that runs on a target PC **without
+  Node.js**.
 - A "Camera systems, NVRs and ActiveX" section in the README covering zone
   settings, emulation modes and the NPAPI dead end.
 

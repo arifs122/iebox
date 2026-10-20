@@ -10,6 +10,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { buildHost, normalizeArch } from './build.js';
+import { exportHost } from './export.js';
 import {
   configPaths,
   ensureConfig,
@@ -46,7 +47,7 @@ import {
   shouldUseColor,
 } from './util.js';
 
-const COMMANDS = new Set(['open', 'build', 'doctor', 'emulation', 'config', 'uninstall', 'help', 'version']);
+const COMMANDS = new Set(['open', 'build', 'doctor', 'emulation', 'export', 'config', 'uninstall', 'help', 'version']);
 
 /* ------------------------------------------------------------------ */
 /* Argument parsing                                                    */
@@ -63,6 +64,8 @@ export function parseArgs(argv = []) {
     emulation: null,
     emulationArg: null,
     arch: null,
+    exportDir: null,
+    exportUrl: null,
     home: false,
     force: false,
     json: false,
@@ -123,6 +126,15 @@ export function parseArgs(argv = []) {
           parsed.arch = String(value);
           break;
         }
+        case '--url': {
+          const value = inline !== null ? inline : argv[i + 1];
+          if (inline === null) i += 1;
+          if (!value || String(value).startsWith('-')) {
+            throw new UserError('--url needs a page URL.');
+          }
+          parsed.exportUrl = String(value);
+          break;
+        }
         case '--help':
           parsed.help = true;
           break;
@@ -169,6 +181,14 @@ export function parseArgs(argv = []) {
       } else if (parsed.command === 'open') {
         if (rest.length > 1) throw new UserError(`Unexpected argument "${rest[1]}". Quote URLs that contain spaces.`);
         parsed.url = rest[0] || null;
+      } else if (parsed.command === 'export') {
+        if (rest.length === 0) {
+          throw new UserError('export needs a target folder: iebox export <dir> [--url <url>].');
+        }
+        if (rest.length > 1) {
+          throw new UserError(`Unexpected argument "${rest[1]}". Quote paths that contain spaces.`);
+        }
+        parsed.exportDir = rest[0];
       } else if (rest.length > 0) {
         throw new UserError(`Unexpected argument "${rest[0]}" for "${parsed.command}".`);
       }
@@ -216,6 +236,7 @@ export function helpText(colors = makeColors(false)) {
     '  iebox build [--force]        Compile the C# host (automatic on first run)',
     '  iebox doctor [--json]        Diagnose the environment',
     '  iebox emulation <mode>       Set the default document mode',
+    '  iebox export <dir> [--url]   Copy a portable folder for another Windows PC',
     '  iebox config                 Print config paths and values',
     '  iebox uninstall              Remove %LOCALAPPDATA%\\iebox and the HKCU value',
     '',
@@ -227,6 +248,7 @@ export function helpText(colors = makeColors(false)) {
     '  --emulation <mode>           Override the mode for this run only',
     '  --arch <x86|x64|anycpu>      Host architecture; x86 is the default because',
     '                               32-bit ActiveX (camera/NVR plugins) needs it',
+    '  --url <url>                  URL baked into the launcher written by `export`',
     '  --json                       Machine-readable output (doctor, config)',
     '  --no-color, -q               Plain output; -q also hides progress lines',
     '  -h, --help                   Show this help',
@@ -293,6 +315,36 @@ function commandBuild(parsed, context) {
   io.out(`  architecture ${result.arch === 'x86' ? '32-bit (x86) — required by most legacy ActiveX' : (result.arch || 'x86')}`);
   io.out(`  compiler    ${result.csc}`);
   io.out(`  source hash ${result.hash.slice(0, 16)}...`);
+  return EXIT.OK;
+}
+
+function commandExport(parsed, context) {
+  const { io, colors, env, platform, deps } = context;
+
+  const build = (deps.buildHost || buildHost)({
+    env,
+    platform,
+    force: false,
+    arch: parsed.arch || undefined,
+  });
+  if (!parsed.quiet) {
+    io.out(colors.dim(`Host ready: ${build.exe}`));
+  }
+
+  const dir = path.resolve(parsed.exportDir);
+  const exporter = deps.exportHost || exportHost;
+  const result = exporter({
+    dir,
+    exePath: build.exe,
+    url: parsed.exportUrl || null,
+    arch: build.arch,
+  });
+
+  io.out(`${colors.green('Exported a portable iebox folder.')} ${colors.dim(result.dir)}`);
+  io.out(`  ${result.exe}`);
+  io.out(`  ${result.launcher}`);
+  io.out(`  ${result.readme}`);
+  io.out(colors.dim('  Node.js is not needed in that folder — copy it to the target PC and double-click the .cmd file.'));
   return EXIT.OK;
 }
 
@@ -552,6 +604,8 @@ export async function main(argv = process.argv.slice(2), deps = {}) {
         return await commandOpen(parsed, context);
       case 'emulation':
         return commandEmulation(parsed, context);
+      case 'export':
+        return commandExport(parsed, context);
       case 'config':
         return commandConfig(parsed, context);
       case 'uninstall':

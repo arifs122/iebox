@@ -139,6 +139,20 @@ control.
 kind) instead of ActiveX. Those cannot load in Trident either; use the vendor's
 native client for that model.
 
+### Handing it to someone else
+
+Once the host is built you can hand a technician a folder that needs neither
+Node.js nor this repository:
+
+```powershell
+iebox export C:\iebox-camera --url http://192.168.1.64/
+```
+
+The folder contains the compiled `iebox-host.exe`, a double-clickable launcher
+with the URL baked in, and a `README.txt` describing the ActiveX steps above.
+Copy it to the target PC and double-click. The only requirement there is Windows
+with .NET Framework 4.x, which ships with Windows 10/11.
+
 The ActiveX control runs native code with your Windows user's privileges. That
 is the whole point of using this engine, and it is the risk. Keep the camera UI
 on a trusted network.
