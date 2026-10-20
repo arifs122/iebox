@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-unix:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # No npm install: the project has zero dependencies. Windows-only tests
+      # (including the csc compile smoke test) skip themselves on these hosts.
+      - name: Run tests
+        run: npm test
+
+  windows:
+    name: windows build + doctor
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run tests (includes the real csc compile smoke test)
+        run: npm test
+
+      - name: Diagnose the runner
+        run: node bin/iebox.js doctor
+
+      - name: Compile the host from source
+        run: node bin/iebox.js build --force
+
+      - name: Diagnose again (host should now be fresh)
+        run: node bin/iebox.js doctor

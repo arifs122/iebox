@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability in iebox
+    url: https://github.com/arifs122/iebox/security/advisories/new
+    about: Report a problem in iebox privately. Never open a public issue for a vulnerability.
+  - name: How iebox works and why it is risky
+    url: https://github.com/arifs122/iebox/blob/main/SECURITY.md
+    about: Read this before reporting that MSHTML is unsandboxed or that TLS 1.3 fails.
+  - name: Questions and ideas
+    url: https://github.com/arifs122/iebox/discussions
+    about: Ask a question or discuss a use case that does not fit the issue forms.

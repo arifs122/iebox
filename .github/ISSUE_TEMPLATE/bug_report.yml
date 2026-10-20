@@ -1,0 +1,94 @@
+name: Bug report
+description: Something in iebox does not work on Windows
+title: "[bug] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. iebox runs a retired, unsandboxed engine, so please
+        do not paste passwords, internal URLs, cookies or personal data.
+
+        Security problems in iebox itself should go through SECURITY.md, not this
+        public form.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the behaviour and what you expected instead.
+      placeholder: |
+        I ran `iebox http://intranet.local/` and the window opened, but the page
+        showed the error overlay. Expected the report page to render.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The exact commands and clicks, in order.
+      placeholder: |
+        1. node bin/iebox.js doctor
+        2. node bin/iebox.js http://intranet.local/reports
+        3. Click Back
+        4. ...
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: "`iebox doctor --json` output"
+      description: Run `node bin/iebox.js doctor --json` and paste the result. Redact internal host names if needed.
+      render: json
+    validations:
+      required: true
+  - type: input
+    id: iebox-version
+    attributes:
+      label: iebox version
+      description: Output of `iebox --version` or `node bin/iebox.js --version`.
+      placeholder: iebox 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: Windows 11 Pro 24H2 (26100)
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Node.js version
+      placeholder: v20.11.0
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How are you running iebox?
+      options:
+        - From a git clone
+        - npm install -g iebox
+        - npx iebox
+        - A fork or modified copy
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Error dialogs, the page title, whether the Modern button works, screenshots with secrets removed.
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I am running Windows 10 or 11.
+          required: true
+        - label: I ran `iebox doctor` and included the output.
+          required: true
+        - label: This is not a security issue in iebox itself (those go through SECURITY.md).
+          required: true

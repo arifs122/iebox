@@ -1,0 +1,57 @@
+name: Feature request
+description: Suggest a focused improvement to iebox
+title: "[feature] "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        iebox is deliberately small: a standalone WinForms window around MSHTML,
+        a zero-dependency CLI, and a build that uses the compiler already on
+        Windows. Proposals that add a modern engine, a sandbox, telemetry,
+        dependencies, or admin requirements are out of scope.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: Describe the real workflow, not only the proposed implementation.
+      placeholder: Our intranet opens reports in a second IE window; I want them in the same iebox window.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behaviour
+      description: What should iebox do? Keep it specific.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Including Edge IE mode, a VM, or fixing the legacy page.
+    validations:
+      required: false
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Host window / navigation
+        - Emulation / document modes
+        - URL handling
+        - CLI / diagnostics
+        - Build / csc
+        - Docs
+        - Other
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - label: This does not require a new npm dependency, telemetry, elevation, or an HKLM write.
+          required: true
+        - label: I understand iebox runs a retired, unsandboxed engine and this request does not try to hide that.
+          required: true
