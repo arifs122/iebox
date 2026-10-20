@@ -8,10 +8,10 @@ iebox doctor
                           found  C:\WINDOWS\Microsoft.NET\Framework\v4.0.30319\csc.exe
   [OK] WebBrowser / CLR   CLR 4.8.9345.0 built by: NET481REL1LAST_25H2_C (C:\WINDOWS\Microsoft.NET\Framework64\v4.0.30319\mscorlib.dll); WebBrowser control MSHTML 11.00.26100.8875 (WinBuild.160101.0800)
   [--] iexplore.exe       C:\Program Files\Internet Explorer\iexplore.exe (informational; not required)
-  [OK] Compiled host      C:\Users\Arif\AppData\Local\iebox\bin\iebox-host.exe (46.5 KB, 32-bit (x86)), cache matches the source
+  [OK] Compiled host      C:\Users\you\AppData\Local\iebox\bin\iebox-host.exe (46.5 KB, 32-bit (x86)), cache matches the source
   [OK] Emulation (HKCU)   11001 (IE11) for iebox-host.exe
-  [OK] Config             C:\Users\Arif\AppData\Local\iebox\config.json
-                          homeUrl: file:///C:/Users/Arif/Desktop/iebox/docs/demo/legacy-page.html; emulation: ie11; seenWarning: true
+  [OK] Config             C:\Users\you\AppData\Local\iebox\config.json
+                          homeUrl: file:///C:/Users/you/Desktop/iebox/docs/demo/legacy-page.html; emulation: ie11; seenWarning: true
 
 Verdict: Ready. Run `iebox <url>` to open a page in the Trident engine.
 8 ok, 0 warning(s), 0 failure(s), 1 note(s)

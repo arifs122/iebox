@@ -2,7 +2,7 @@
 
 This is a private checklist for the maintainer. It assumes the repository is
 
-- `C:\Users\Arif\Desktop\iebox` locally,
+- `<path-to-iebox>` locally,
 - published as `arifs122/iebox` on GitHub,
 - and optionally mirrored to npm as `iebox`.
 
@@ -12,7 +12,7 @@ Nothing here is required to use the tool. iebox has **zero dependencies** and
 ## 1. Pre-flight
 
 ```powershell
-cd C:\Users\Arif\Desktop\iebox
+cd <path-to-iebox>
 
 node --version                 # 18 or newer
 npm test                       # must be 100% green
